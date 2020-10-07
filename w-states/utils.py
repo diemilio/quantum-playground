@@ -85,9 +85,9 @@ def num_to_latex(num, precision=5):
         else:
             return "{}i".format(imagstring)
     if common_facstring != None:
-        return "{}({} {} {}i)".format(common_facstring, realstring, operation, imagstring)
+        return "{} \\left( {} {} {}i \\right)".format(common_facstring, realstring, operation, imagstring)
     else:
-        return "{} {} {}i".format(realstring, operation, imagstring)
+        return "\\left( {} {} {}i \\right)".format(realstring, operation, imagstring)
 
 def vector_to_latex(vector, precision=5, pretext=""):
     """Latex representation of a complex numpy array (with dimension 1)
@@ -98,7 +98,7 @@ def vector_to_latex(vector, precision=5, pretext=""):
             pretext: (str) Latex string to be prepended to the latex, intended for labels.
         
         Returns:
-            str: Bra-Ket representation of the vector in Latex, wrapped in $$
+            str: ket representation of the vector in Latex, wrapped in $$
     """
     l = np.log2(len(vector))
     
@@ -110,16 +110,21 @@ def vector_to_latex(vector, precision=5, pretext=""):
 
     for i, amplitude in enumerate(vector):
         num_string = num_to_latex(amplitude, precision=precision)
-        if num_string != '0':
-            out_string += num_string + "|" +  "{num:0{width}b}".format(num=i, width=l) + "\\rangle + "
+        
+        if num_string != '0': # only add ket term if prob amplitude is non-zero
+            if (out_string[-2] == '+') and (num_string[0] == '-'): # remove + sign from summation if next prob amplitude is neg
+                out_string = out_string[:-2]
+            if num_string != '1': # don't include prob amplitude next to ket if equal to 1
+                out_string += num_string
+            out_string += "|" +  "{num:0{width}b}".format(num=i, width=l) + "\\rangle + "
     if len(vector) != 0:
-        out_string = out_string[:-3] + "\n"# remove trailing characters
+        out_string = out_string[:-3] + "\n" # remove trailing characters
     out_string += "$$"
     return out_string
 
 
 def print_statevector(array, precision=5, pretext="", display_output=True):
-    """Converts a numpy array with the probability amplitudes of a statevector into its bra-ket representation in Latex
+    """Converts a numpy array with the probability amplitudes of a statevector into its ket representation in Latex
 
         Args:
             array (ndarray): The array to be converted to latex, must have dimension 1.
@@ -142,7 +147,7 @@ def print_statevector(array, precision=5, pretext="", display_output=True):
     if array.ndim == 1:
         output = vector_to_latex(array, precision=precision, pretext=pretext)
     else:
-        raise ValueError("array_to_braket can only convert numpy ndarrays of dimension 1")
+        raise ValueError("print_statevector can only convert numpy ndarrays of dimension 1")
     
     if display_output:
         display(Math(output))
