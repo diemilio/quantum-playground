@@ -4,9 +4,9 @@ import math
 from fractions import Fraction
 
 """
-The code in this file is a modified version of the array_to_latex function from IBM's Qiskit textbook package tools:
+The functions num_to_latex and vector_to_latex are modified versions of functions that are part of IBM's Qiskit textbook tools:
 https://github.com/qiskit-community/qiskit-textbook
-That code is under an Apache 2.0 license, and I have received personal authorization from Frank Harkins     
+That code is under an Apache 2.0 license, and I have received direct authorization from Frank Harkins     
 (who wrote the original code) to reuse the functions in here.
 https://github.com/frankharkins
 """
@@ -127,7 +127,7 @@ def print_statevector(array, precision=5, pretext="", display_output=True):
     """Converts a numpy array with the probability amplitudes of a statevector into its ket representation in Latex
 
         Args:
-            array (ndarray): The array to be converted to latex, must have dimension 1.
+            array (ndarray or Statevector): The array to be converted to latex, must have dimension 1.
             precision: (int) For numbers not close to integers, the number of decimal places to round to.
             pretext: (str) Latex string to be prepended to the latex, intended for labels.
         
@@ -138,11 +138,15 @@ def print_statevector(array, precision=5, pretext="", display_output=True):
             ValueError: If array can not be interpreted as a numerical numpy array
             ValueError: If the dimension of array is not 1
     """
+
+    if type(array).__name__ == 'Statevector':
+        array = array.data
+
     try:
         array = np.asarray(array)
         array+1 # Test array contains numerical data
     except:
-        raise ValueError("array_to_latex can only convert numpy arrays containing numerical data, or types that can be converted to such arrays")
+        raise ValueError("print_statevector can only convert arrays containing numerical data, or types that can be converted to such arrays")
 
     if array.ndim == 1:
         output = vector_to_latex(array, precision=precision, pretext=pretext)
